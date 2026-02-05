@@ -1,7 +1,8 @@
 from dotenv import load_dotenv
 import streamlit as st
 from langchain_groq import ChatGroq
-
+from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_ollama import ChatOllama
 # Load .env file
 load_dotenv()
 
@@ -12,6 +13,52 @@ st.set_page_config(
     layout="centered",
 )
 st.title("💬 Mama- Your Friendly AI Chatbot")
+
+
+# llm will be initialized after provider/model selection
+llm = None
+option = st.selectbox(
+    "Choose Provider?",
+    ("Groq", "Gemini", "Ollama"),
+    index=None,
+)
+
+if option:
+    print(f"Selected option: {option}")
+    model = None
+    if option == "Groq":
+        model = st.selectbox(
+            "Choose Model?",
+            ("llama-3.3-70b-versatile", "llama-3.1-8b-instant", "allam-2-7b"),
+            index=None,
+        )
+        if model:
+            llm = ChatGroq(
+                model=model,
+                temperature=0.
+            )
+    elif option == "Gemini":
+        model = st.selectbox(
+            "Choose Model?",
+            ("gemini-2.5-flash"),
+            index=None,
+        )
+        if model:
+            llm = ChatGoogleGenerativeAI(
+                model=model,
+                temperature=0.
+            )
+    elif option == "Ollama":
+        model = st.selectbox(
+            "Choose Model?",
+            ("gemma2:2b"),
+            index=None,
+        )
+        if model:
+            llm = ChatOllama(
+                model=model,
+                temperature=0.
+            )
 
 # chat_history = []  here we don't do like this because in streamlit, each time the user sends a message, the whole script is rerun and the chat_history will be reset to an empty list. To persist the chat history across reruns, we can use Streamlit's session state.
 
@@ -30,20 +77,16 @@ for message in st.session_state.chat_history:
         st.markdown(message["content"])
 
 
-# llm initiate
-llm = ChatGroq(
-    model="llama-3.3-70b-versatile",
-    temperature=0.
-    )
+
 
 # input box
 user_prompt = st.chat_input("Ask Chatbot...")
 
 
-if user_prompt:
+
+if user_prompt and llm:
     st.chat_message("user").markdown(user_prompt)
     st.session_state.chat_history.append({"role": "user", "content": user_prompt})
-
 
     # Check for name/identity questions
     name_questions = [
@@ -94,7 +137,10 @@ if user_prompt:
     st.session_state.chat_history.append({"role": "assistant", "content": assistant_response})
 
     with st.chat_message("assistant"):
-        st.markdown(assistant_response)
+        try:
+            st.markdown(assistant_response)
+        except Exception as e:
+            print(f"Error rendering markdown: {e}")
 
 
 
