@@ -11,7 +11,7 @@ st.set_page_config(
     page_icon="🤖",
     layout="centered",
 )
-st.title("💬 Generative AI Chatbot")
+st.title("💬 Mama- Your Friendly AI Chatbot")
 
 # chat_history = []  here we don't do like this because in streamlit, each time the user sends a message, the whole script is rerun and the chat_history will be reset to an empty list. To persist the chat history across reruns, we can use Streamlit's session state.
 
