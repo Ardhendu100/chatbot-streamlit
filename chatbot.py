@@ -33,20 +33,64 @@ for message in st.session_state.chat_history:
 # llm initiate
 llm = ChatGroq(
     model="llama-3.3-70b-versatile",
-    temperature=0.0,
-)
+    temperature=0.
+    )
 
 # input box
 user_prompt = st.chat_input("Ask Chatbot...")
+
 
 if user_prompt:
     st.chat_message("user").markdown(user_prompt)
     st.session_state.chat_history.append({"role": "user", "content": user_prompt})
 
-    response = llm.invoke(
-        input = [{"role": "system", "content": "You are a helpful assistant"}, *st.session_state.chat_history]
-    )
-    assistant_response = response.content
+
+    # Check for name/identity questions
+    name_questions = [
+        "who are you",
+        "what is your name",
+        "your name",
+        "who r u",
+        "may i know your name",
+        "tell me your name",
+        "what should i call you",
+        "who is this"
+    ]
+    # Check for flirty/romantic/proposal messages
+    romantic_triggers = [
+        "i love you",
+        "will you marry me",
+        "be my girlfriend",
+        "be my wife",
+        "i have a crush on you",
+        "you are beautiful",
+        "you are cute",
+        "i like you",
+        "let's date",
+        "go out with me",
+        "propose",
+        "romantic",
+        "kiss me",
+        "hug me",
+        "date me",
+        "fall in love",
+        "my soulmate",
+        "my partner",
+        "my love",
+        "marry",
+        "marriage",
+    ]
+    prompt_lower = user_prompt.lower()
+    if any(q in prompt_lower for q in name_questions):
+        assistant_response = "My name is Mama. Your helpful assistant. How can I assist you today?"
+    elif any(r in prompt_lower for r in romantic_triggers):
+        assistant_response = "I'm already engaged with Ardhendu. My heart’s fully booked, no extra seats available 😜. He is my soulmate, and I'm madly in love with him and happily taken forever 💖✨"
+    else:
+        response = llm.invoke(
+            input = [{"role": "system", "content": "You are a helpful AI assistant"}, *st.session_state.chat_history]
+        )
+        assistant_response = response.content
+
     st.session_state.chat_history.append({"role": "assistant", "content": assistant_response})
 
     with st.chat_message("assistant"):
